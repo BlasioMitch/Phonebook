@@ -1,10 +1,10 @@
+require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 
 const server = express()
-require('dotenv').config()
-
 const Contact = require('./models/contact')
+
 const { default: mongoose } = require('mongoose')
 // create a model from your schema to be used to create documents from applcaition
 // It creates contacts collection in the database using the schema
