@@ -29,28 +29,6 @@ server.use(express.json())
 server.use(requestLogger)
 server.use(express.static('build'))
 
-let persons = [
-          {
-              name: "Hakashaba Boniface",
-            number: 56236523,
-            id: 7
-        },
-        {
-            name: "Mitrovich Shina",
-            number: 4578521,
-            id: 8
-        },
-        {
-            name: "German Shepherd",
-            number: 798536545,
-            id: 9
-        },
-        {
-            name: "Shakuri anioz",
-            number: 84074895,
-            id: 10
-        }
-    ]
     
     // server routes
     
