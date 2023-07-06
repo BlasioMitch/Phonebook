@@ -1,11 +1,11 @@
-require('dotenv').config()
+// require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 
 const server = express()
 const Contact = require('./models/contact')
 
-const { default: mongoose } = require('mongoose')
+const mongoose = require('mongoose')
 // create a model from your schema to be used to create documents from applcaition
 // It creates contacts collection in the database using the schema
 // const Contact = mongoose.model('Contact',contactSchema)
@@ -29,8 +29,13 @@ server.use(express.json())
 server.use(requestLogger)
 server.use(express.static('build'))
 
+// Fetching current state of database to backend
+let persons = []
+Contact.find({}).then(r => r.forEach(p =>{
+    persons = persons.concat(p)
+}))
     
-    // server routes
+// server routes
     
 server.get('/', (request, response) => {
     response.send('<h1>Welcome to the backend server for your phone book app</h1>')
@@ -41,7 +46,6 @@ server.get('/api/contacts', (request, response) => {
     Contact.find({}).then(contacts => {
         response.json(contacts)
     })
-    mongoose.connection.close()
 
 })
 
@@ -75,9 +79,6 @@ server.delete('/api/contacts/:id', (request, response) => {
     }
 })
 
-let maxID = () => persons.length > 0 ?
-Math.max(...persons.map(p => p.id)):
-0
 
 server.post('/api/contacts/', (request, response) =>{
     const body = request.body
@@ -98,13 +99,13 @@ server.post('/api/contacts/', (request, response) =>{
     }else{
         const person = new Contact({
             name:body.name,
-            number:body.number
-            // id:maxID() +1
+            number:body.number,
+            _id:body.id
+            // _id:maxID() +1
         })
         person.save().then(sn => {
-            console.log('saved ',person.name)
+            console.log(sn.id,' saved ',person.name)
             response.json(sn)
-            mongoose.connection.close()
         }).catch(err =>{
             response.status(400).json({error:'unable to save'})
         })
