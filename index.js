@@ -19,11 +19,19 @@ const requestLogger = (request, response, next) =>{
     next()
 }
 
-const unknownRequest = (request, response, next) =>{
+const errorHandler = ( error, request, response, next ) =>{
+    console.error(error.message)
+    if (error.name === 'CastError'){
+        return response.status(400).send({error:"Malformatted ID used"})
+    }
+    next(error)
+}
+const unknownEndpoint = (request, response) =>{
     response.status(404).send({
         error:'unknown endpoint'
     })
 }
+
 server.use(cors())
 server.use(express.json())
 server.use(requestLogger)
@@ -58,25 +66,24 @@ response.send(`
 `)
 })
 
-server.get('/api/contacts/:id', (request, response) => {
-    const pid = Number(request.params.id)
-    const person = persons.find(p => p.id === pid)
-    if (person){
-        response.json(person)
-    }else{
-        response.status(404).end()
-    }
+server.get('/api/contacts/:id', (request, response, next) => {
+    const pid = request.params.id
+    Contact.findById(pid)
+        .then(contact =>{
+            if(contact){
+                response.json(contact)
+            }else{
+                response.status(404).end()
+            }
+        })
+        .catch(error =>next(error))
 })
 
-server.delete('/api/contacts/:id', (request, response) => {
-    const pid = Number(request.params.id)
-    const person = persons.find(p => p.id === pid)
-    if (person){
-        persons = persons.filter(p => p.id !== pid)
-        response.json(persons)
-    } else{
-        response.status(204).end()
-    }
+server.delete('/api/contacts/:id', (request, response,next) => {
+    const pid = request.params.id
+    Contact.findByIdAndDelete(pid)
+        .then(contact =>  response.status(204).end())
+        .catch(error => next(error))
 })
 
 
@@ -114,7 +121,25 @@ server.post('/api/contacts/', (request, response) =>{
         // response.json(person)
     }
 })
-server.use(unknownRequest)
+
+// updating document in database
+server.put('/api/contacts/:id', (request, response, next) =>{
+    const pid = request.params.findById
+    const body = request.body
+    const contact = {
+        name:body.name,
+        number:body.number
+    }
+    Contact.findByIdAndUpdate(pid,contact,{new:true})
+        .then(updatedContact =>{
+            response.json(updatedContact)
+        })
+        // .catch(error=>console.error(error.message))
+        .catch(error => next(error))
+})
+
+server.use(unknownEndpoint)
+server.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 
