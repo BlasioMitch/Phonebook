@@ -2,10 +2,12 @@
 // import mongoose
 const mongoose = require('mongoose')
 
+
+// const url = process.env.MONGODB_URI
+const url = `mongodb+srv://admin:root@cluster0.kcdg0id.mongodb.net/contacts?retryWrites=true&w=majority`
 mongoose.set('strictQuery',false)
 
-const url = process.env.MONGODB_URI
-console.log('connecting to ',url)
+console.log('connecting to MongoDB...')
 
 mongoose.connect(url)
     .then(result => {
@@ -17,13 +19,14 @@ mongoose.connect(url)
 
 // create a schema for your documents as a template
 const contactSchema = new mongoose.Schema({
+    _id:Number,
     name:String,
     number:String
 })
 
 contactSchema.set('toJSON',{
     transform: (document, returnedObject) => {
-        returnedObject.id = returnedObject._id.toString()
+        returnedObject.id = returnedObject._id
         delete returnedObject._id
         delete returnedObject.__v
     }
