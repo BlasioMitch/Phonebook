@@ -1,8 +1,8 @@
-// require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
-
 const server = express()
+
+require('dotenv').config()
 const Contact = require('./models/contact')
 
 const mongoose = require('mongoose')
@@ -141,7 +141,7 @@ server.put('/api/contacts/:id', (request, response, next) =>{
 server.use(unknownEndpoint)
 server.use(errorHandler)
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 
 server.listen(PORT, () => {
     console.log(`Welcome to this Server running at Port ${PORT}`)
