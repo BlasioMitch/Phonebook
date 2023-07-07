@@ -20,8 +20,16 @@ mongoose.connect(url)
 // create a schema for your documents as a template
 const contactSchema = new mongoose.Schema({
     _id:Number,
-    name:String,
-    number:String
+    name:{
+        type: String,
+        minLength: 2,
+        required: true
+    },
+    number:{
+        type: String,
+        minLength: 5,
+        required: true
+    }
 })
 
 contactSchema.set('toJSON',{

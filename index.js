@@ -23,7 +23,12 @@ const errorHandler = ( error, request, response, next ) =>{
     console.error(error.message)
     if (error.name === 'CastError'){
         return response.status(400).send({error:"Malformatted ID used"})
+    } else if (error.name === 'ValidationError'){
+        return response.status(400).send({error:error.message})
+    } else if (error.name === 'ReferenceError'){
+        return response.status(500).send({error:error.message})
     }
+
     next(error)
 }
 const unknownEndpoint = (request, response) =>{
@@ -87,19 +92,10 @@ server.delete('/api/contacts/:id', (request, response,next) => {
 })
 
 
-server.post('/api/contacts/', (request, response) =>{
+server.post('/api/contacts/', (request, response, next) =>{
     const body = request.body
     // const exp = persons.filter
-    if (!body.name){
-        return response.status(400).json({
-            error:'name is missing'
-        })
-        
-    }else if(!body.number){
-        return response.status(400).json({
-            error:'number is missing'
-        })
-    }else if(persons.find(p => p.name === body.name)){
+    if (persons.find(p => p.name === body.name)){
         return  response.status(400).json({
             error: `${body.name} exists`
         })
@@ -108,34 +104,36 @@ server.post('/api/contacts/', (request, response) =>{
             name:body.name,
             number:body.number,
             _id:body.id
-            // _id:maxID() +1
         })
         person.save().then(sn => {
-            console.log(sn.id,' saved ',person.name)
+            console.log('saved ',person.name)
             response.json(sn)
-        }).catch(err =>{
-            response.status(400).json({error:'unable to save'})
-        })
-
-        // persons = persons.concat(person)
-        // response.json(person)
+        }).catch(error => next(error))
     }
 })
 
 // updating document in database
 server.put('/api/contacts/:id', (request, response, next) =>{
-    const pid = request.params.findById
-    const body = request.body
-    const contact = {
-        name:body.name,
-        number:body.number
-    }
-    Contact.findByIdAndUpdate(pid,contact,{new:true})
-        .then(updatedContact =>{
-            response.json(updatedContact)
-        })
-        // .catch(error=>console.error(error.message))
-        .catch(error => next(error))
+    const pid = request.params.id
+    const {name, number} = request.body
+    Contact.findByIdAndUpdate(
+        pid,
+        {name,number},
+        {new:true, runValidators:true, context:'query'}
+    ).then(updatedContact=>{
+        response.json(updatedContact)
+    }).catch(error => next(error))
+    // const body = request.body
+    // const contact = {
+    //     name:body.name,
+    //     number:body.number
+    // }
+    // Contact.findByIdAndUpdate(pid,contact,{new:true})
+    //     .then(updatedContact =>{
+    //         response.json(updatedContact)
+    //     })
+    //     // .catch(error=>console.error(error.message))
+    //     .catch(error => next(error))
 })
 
 server.use(unknownEndpoint)
