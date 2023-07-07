@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 
 
 // const url = process.env.MONGODB_URI
-const url = `mongodb+srv://admin:root@cluster0.kcdg0id.mongodb.net/contacts?retryWrites=true&w=majority`
+const url = process.env.MONGODB_URI
 mongoose.set('strictQuery',false)
 
 console.log('connecting to MongoDB...')
