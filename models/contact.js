@@ -1,21 +1,5 @@
-// ******* Connecting to the mondoDB database**********************
 // import mongoose
 const mongoose = require('mongoose')
-
-
-// const url = process.env.MONGODB_URI
-const url = process.env.MONGODB_URI
-mongoose.set('strictQuery',false)
-
-console.log('connecting to MongoDB...')
-
-mongoose.connect(url)
-    .then(result => {
-        console.log('Connected to MongoDB')
-    })
-    .catch((error) => {
-        console.log('Error connecting to MOongoDB: ', error.message)
-    })
 
 // create a schema for your documents as a template
 const contactSchema = new mongoose.Schema({
@@ -29,6 +13,10 @@ const contactSchema = new mongoose.Schema({
         type: String,
         minLength: 5,
         required: true
+    },
+    user: {
+        type: mongoose.Schema.Types.Number,
+        ref: 'User'
     }
 })
 
