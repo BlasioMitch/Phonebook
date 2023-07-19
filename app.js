@@ -1,5 +1,6 @@
 const config = require('./utils/config')
 const express = require('express')
+require('express-async-errors')
 const server = express()
 const cors = require('cors')
 const usersRouter = require('./controllers/users')
@@ -31,4 +32,5 @@ server.use('/api/contacts', contactsRouter)
 server.use('/api/login', loginRouter)
 server.use(middleware.unknownEndpoint)
 server.use(middleware.errorHandler)
+
 module.exports = server
