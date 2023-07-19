@@ -6,14 +6,6 @@ const jwt = require('jsonwebtoken')
 
 // get token
 
-const getTokenFrom = request => {
-    const authorization = request.get('authorizaton')
-    if(authorization && authorization.startsWith('Bearer ')){
-        return authorization.replace('Bearer ','')
-    }
-    return null
-}
-
 // const getTokenFrom = request => {
 //     const authorization = request.get('authorizaton')
 //     if(authorization && authorization.startsWith('Bearer ')){
@@ -61,30 +53,6 @@ contactsRouter.delete('/:id', (request, response,next) => {
 })
 
 // posting a contact
-
-contactsRouter.post('/', async (request, response, next) => {
-    const body = request.body
-    const decodedToken = jwt.verify(getTokenFrom(request), config.SECRET)
-    if(!decodedToken.id) {
-        return response.status(401).json({ error:"invlaid token" })
-    }
-
-    const user = await User.findById(decodedToken.id)
-    const person = new Contact({
-        name:body.name,
-        number:body.number,
-        _id:body.id,
-        user: user.id
-    })
-    try{
-        const savedContact = await person.save()
-        user.contacts = user.contacts.concat(savedContact._id)
-        await user.save()
-        console.log('saved ',person.name)
-        response.status(201).json(savedContact)
-    } catch (exception) {
-        next(exception)
-    }
 
 contactsRouter.post('/', async (request, response) => {
     const body = request.body
