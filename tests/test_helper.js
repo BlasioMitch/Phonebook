@@ -2,16 +2,14 @@ const Contact = require('../models/contact')
 
 const initialContacts = [
     {
-        _id:1,
         name:'Mitchell',
-        number:'739238',
-        contacts: [1,3,4]
+        number:73334238,
+        user: "64b7cbec9885104539224bb8"
     },
     {
-        _id:2,
         name:'Nsimbi',
-        number:'2345232',
-        contacts: [2,5,6]
+        number:2345232,
+        user: "64b7cbec9885104539224bb8"
     }
 ]
 
@@ -20,7 +18,7 @@ const nonExistingId = async () => {
     await contact.save()
     await contact.deleteOne()
 
-    return contact._id
+    return contact.id
 }
 
 const contactsInDb = async () => {

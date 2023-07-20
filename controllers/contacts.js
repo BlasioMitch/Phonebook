@@ -6,13 +6,13 @@ const jwt = require('jsonwebtoken')
 
 // get token
 
-// const getTokenFrom = request => {
-//     const authorization = request.get('authorizaton')
-//     if(authorization && authorization.startsWith('Bearer ')){
-//         return authorization.replace('Bearer ','')
-//     }
-//     return null
-// }
+const getTokenFrom = request => {
+    const authorization = request.get('Authorization')
+    if(authorization && authorization.startsWith('Bearer ')){
+        return authorization.replace('Bearer ','')
+    }
+    return null
+}
 
 
 
@@ -32,44 +32,37 @@ contactsRouter.get('/info', (request, response) => {
     `)
 })
 // fetching contact by id
-contactsRouter.get('/:id', (request, response, next) => {
-    const pid = request.params.id
-    Contact.findById(pid)
-        .then(contact => {
-            if(contact){
-                response.json(contact)
-            }else{
-                response.status(404).end()
-            }
-        })
-        .catch(error => next(error))
+contactsRouter.get('/:id', async (request, response) => {
+    const contact = await Contact.findById(request.params.id)
+        if(contact){
+            response.json(contact)
+        }else{
+            response.status(404).end()
+        }
 })
 //deleting a contact by id
-contactsRouter.delete('/:id', (request, response,next) => {
-    const pid = request.params.id
-    Contact.findByIdAndDelete(pid)
-        .then(() =>  response.status(204).end())
-        .catch(error => next(error))
+contactsRouter.delete('/:id', async (request, response) => {
+    await Contact.findByIdAndRemove(request.params.id)
+    response.status(204).end()
 })
 
 // posting a contact
 
 contactsRouter.post('/', async (request, response) => {
     const body = request.body
-    // const decodedToken = jwt.verify(getTokenFrom(request), config.SECRET)
-    // if(!decodedToken.id) {
-    //     return response.status(401).json({ error:"invlaid token" })
-    // }
-
-    const user = await User.findById(body.user)
+    const decodedToken = jwt.verify(getTokenFrom(request), config.SECRET)
+    if(!decodedToken.id) {
+        return response.status(401).json({ error:"invalid token" })
+    }
     const person = new Contact({
-        _id:body.id,
         name:body.name,
         number:body.number,
-        user: body.user
+        user: decodedToken.id
     })
+    
+    const user = await User.findById(decodedToken.id)
     const savedContact = await person.save()
-    user.contacts = user.contacts.concat(savedContact._id)
+    user.contacts = user.contacts.concat(savedContact.id)
     await user.save()
     console.log('saved ',person.name)
     response.status(201).json(savedContact)
@@ -77,16 +70,18 @@ contactsRouter.post('/', async (request, response) => {
 })
 
 // updating contact in database
-contactsRouter.put('/:id', (request, response, next) => {
+contactsRouter.put('/:id', async (request, response) => {
+    const decodedToken = jwt.verify(getTokenFrom(request), config.SECRET)
+    if(!decodedToken.id) {
+        return response.status(401).json({ error:"invalid token" })
+    }
     const pid = request.params.id
     const { name, number } = request.body
-    Contact.findByIdAndUpdate(
+    const updatedContact = await Contact.findByIdAndUpdate(
         pid,
         { name,number },
-        { new:true, runValidators:true, context:'query' }
-    ).then(updatedContact => {
-        response.json(updatedContact)
-    }).catch(error => next(error))
+        { new:true, runValidators:true, context:'query' })
+    response.json(updatedContact)
 })
 
 module.exports = contactsRouter

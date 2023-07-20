@@ -3,7 +3,6 @@ const mongoose = require('mongoose')
 
 // create a schema for your documents as a template
 const contactSchema = new mongoose.Schema({
-    _id:Number,
     name:{
         type: String,
         minLength: 2,
@@ -15,14 +14,14 @@ const contactSchema = new mongoose.Schema({
         required: true
     },
     user: {
-        type: mongoose.Schema.Types.Number,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }
 })
 
 contactSchema.set('toJSON',{
     transform: (document, returnedObject) => {
-        returnedObject.id = returnedObject._id
+        returnedObject.id = returnedObject._id.toString()
         delete returnedObject._id
         delete returnedObject.__v
     }
